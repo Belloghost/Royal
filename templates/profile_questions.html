@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Questionnaire - Royal Chuckles</title>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --secondary: #2B4162;
+            --accent: #FFD166;
+            --light: #F8F9FA;
+            --dark: #212529;
+            --success: #06D6A0;
+            --warning: #FFD166;
+            --danger: #EF476F;
+            --family-color: #8A5A44;
+            --gradient-start: #FF6B35;
+            --gradient-end: #FF9E58;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --neon-glow: 0 0 15px rgba(255, 107, 53, 0.7);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Particles background */
+        .particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.3);
+            box-shadow: var(--neon-glow);
+            animation: floatParticle linear infinite;
+        }
+        
+        @keyframes floatParticle {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-100vh) translateX(20px); }
+        }
+        
+        .questionnaire-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Glassmorphism Card */
+        .questionnaire-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.4s ease;
+        }
+        
+        .questionnaire-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .questionnaire-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        .questionnaire-header h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.8rem;
+        }
+        
+        .questionnaire-header p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .questionnaire-header::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .question-group {
+            margin-bottom: 1.8rem;
+            padding-bottom: 1.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .question-group:last-child {
+            border-bottom: none;
+        }
+        
+        .question-label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+        
+        .question-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(30, 41, 59, 0.6);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .question-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.2);
+        }
+        
+        .required-star {
+            color: var(--danger);
+            margin-left: 4px;
+            font-weight: bold;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2.5rem;
+            gap: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--accent);
+            padding-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.05rem;
+            text-align: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            color: white;
+            box-shadow: 0 5px 20px rgba(255,107,53,0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff5a1f, #ff8c42);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Flash Messages */
+        .flashes {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            max-width: 400px;
+        }
+        
+        .flash {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(10px);
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .flash-success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .flash-danger {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .flash-warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .questionnaire-card {
+                padding: 1.8rem;
+            }
+            
+            .questionnaire-header h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .questionnaire-card {
+                padding: 1.5rem;
+            }
+            
+            .questionnaire-header h2 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Hamburger Menu Styles - Same as Notices Page */
+        .menu-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .hamburger {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 1100;
+            transition: transform 0.5s ease;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hamburger:hover {
+            transform: rotate(90deg);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .line {
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(to right, #ffd700, #ff8c00);
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .line:nth-child(1) {
+            transform-origin: top left;
+        }
+        
+        .line:nth-child(3) {
+            transform-origin: bottom left;
+        }
+        
+        .menu-content {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(10, 15, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 215, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            padding: 100px 30px 30px;
+            transition: right 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        
+        .menu-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.05), rgba(255, 140, 0, 0.05), rgba(139, 0, 0, 0.05));
+            z-index: -1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-right: 15px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        .logo span {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(10px);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+        
+        .nav-link i {
+            width: 30px;
+            font-size: 1.2rem;
+            color: #ffd700;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: scale(1.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        .nav-link span {
+            flex: 1;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        
+        .user-menu {
+            margin-top: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .user-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+        }
+        
+        .user-role {
+            font-size: 0.9rem;
+            color: #aaa;
+            display: block;
+        }
+        
+        .logout-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.3);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        /* Animation Classes */
+        .menu-open .menu-content {
+            right: 0;
+        }
+        
+        .menu-open .line:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+            width: 45px;
+        }
+        
+        .menu-open .line:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        
+        .menu-open .line:nth-child(3) {
+            transform: rotate(-45deg) translate(8px, -8px);
+            width: 45px;
+        }
+        
+        .menu-open .hamburger {
+            transform: rotate(180deg);
+        }
+        
+        /* Animation for menu items */
+        .menu-item {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.4s ease;
+        }
+        
+        .menu-open .menu-item {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Prevent body scroll when menu is open */
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-content {
+                width: 300px;
+            }
+            
+            .hamburger {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .menu-content {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles background -->
+    <div class="particles-bg" id="particlesBg"></div>
+    
+    <!-- Flash messages -->
+    <div class="flashes">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Hamburger Menu -->
+    <div class="menu-container">
+        <div class="hamburger" id="hamburger">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        
+        <div class="menu-content" id="menuContent">
+            <div class="logo menu-item">
+                <i class="fas fa-crown"></i>
+                <span>Royal Chuckles</span>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="{{ url_for('dashboard') }}" class="nav-link menu-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('messages') }}" class="nav-link menu-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="{{ url_for('notices') }}" class="nav-link menu-item">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Notices</span>
+                </a>
+                <a href="{{ url_for('profile') }}" class="nav-link menu-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="{{ url_for('album') }}" class="nav-link menu-item">
+                    <i class="fas fa-image"></i>
+                    <span>Family Album</span>
+                </a>
+                <a href="{{ url_for('profile_questions') }}" class="nav-link active menu-item">
+                    <i class="fas fa-question"></i>
+                    <span>Update Your Info</span>
+                </a>
+                <a href="{{ url_for('family_directory') }}" class="nav-link menu-item">
+                    <i class="fas fa-book-open"></i>
+                    <span>Learn About Your Family</span>
+                </a>
+                {% if user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin Panel</span>
+                </a>
+                {% endif %}
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-profile menu-item">
+                    <div class="member-avatar">
+                        {% if user.profile_pic != 'default.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" 
+                                    alt="{{ user.name }}" style="width:100%;height:100%;border-radius:50%;">
+                        {% else %}
+                            {{ user.name[0] }}
+                        {% endif %}
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">{{ user.name }}</span>
+                        <span class="user-role">
+                            {% if user.is_head %}Family Head{% elif user.is_admin %}Admin{% else %}Member{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('logout') }}" class="logout-btn menu-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="questionnaire-container">
+        <div class="questionnaire-header">
+            <h2>Family Profile Questionnaire</h2>
+            <p>Help us build our family history by answering these questions</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('profile_questions') }}">
+            <div class="questionnaire-card">
+                <div class="section-title">Personal Information</div>
+                
+                <div class="question-group">
+                    <label class="question-label">
+                        {{ questions[0].question }}
+                        {% if questions[0].is_required %}<span class="required-star">*</span>{% endif %}
+                    </label>
+                    <input type="text" 
+                        class="question-input date-picker" 
+                        name="birth_date" 
+                        value="{{ profile.birth_date if profile.birth_date else '' }}"
+                        placeholder="Select date"
+                        {% if questions[0].is_required %}required{% endif %}>
+                </div>
+                
+                {% for question in questions[1:] %}
+                {% if question.field_name not in ['grandfather_name', 'grandmother_name', 'father_name', 'mother_name', 'spouse_name', 'children_names', 'siblings_names'] %}
+                <div class="question-group">
+                    <label class="question-label">
+                        {{ question.question }}
+                        {% if question.is_required %}<span class="required-star">*</span>{% endif %}
+                    </label>
+                    <input type="text" 
+                           class="question-input" 
+                           name="{{ question.field_name }}" 
+                           value="{{ profile | attr(question.field_name) if profile is not none else '' }}"
+                           {% if question.is_required %}required{% endif %}>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <div class="section-title">Family Lineage</div>
+                
+                {% for question in questions %}
+                {% if question.field_name in ['grandfather_name', 'grandmother_name', 'father_name', 'mother_name'] %}
+                <div class="question-group">
+                    <label class="question-label">
+                        {{ question.question }}
+                        {% if question.is_required %}<span class="required-star">*</span>{% endif %}
+                    </label>
+                    <input type="text" 
+                           class="question-input" 
+                           name="{{ question.field_name }}" 
+                           value="{{ profile | attr(question.field_name) if profile is not none else '' }}"
+                           {% if question.is_required %}required{% endif %}>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <div class="section-title">Immediate Family</div>
+                
+                {% for question in questions %}
+                {% if question.field_name in ['spouse_name', 'children_names', 'siblings_names'] %}
+                <div class="question-group">
+                    <label class="question-label">
+                        {{ question.question }}
+                        {% if question.is_required %}<span class="required-star">*</span>{% endif %}
+                    </label>
+                    <input type="text" 
+                           class="question-input" 
+                           name="{{ question.field_name }}" 
+                           value="{{ profile | attr(question.field_name) if profile is not none else '' }}"
+                           {% if question.is_required %}required{% endif %}>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <div class="btn-container">
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Back to Profile
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create particles for background
+            function createParticles() {
+                const container = document.getElementById('particlesBg');
+                const particleCount = 50;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random size
+                    const size = Math.random() * 10 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // Random position
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+                    
+                    // Random animation duration
+                    const duration = Math.random() * 20 + 10;
+                    particle.style.animationDuration = `${duration}s`;
+                    
+                    container.appendChild(particle);
+                }
+            }
+            
+            createParticles();
+            
+            // Hamburger menu functionality
+            const hamburger = document.getElementById('hamburger');
+            const menuContent = document.getElementById('menuContent');
+            
+            hamburger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.body.classList.toggle('menu-open');
+            });
+            
+            // Initialize date picker
+            flatpickr(".date-picker", {
+                dateFormat: "Y-m-d",
+                allowInput: true,
+                theme: "dark"
+            });
+            
+            // Staggered animation for menu items
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach((item, index) => {
+                item.style.transitionDelay = `${index * 0.1}s`;
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!menuContent.contains(event.target) && event.target !== hamburger) {
+                    document.body.classList.remove('menu-open');
+                }
+            });
+            
+            // Close menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    document.body.classList.remove('menu-open');
+                });
+            });
+            
+            // Auto-remove flash messages after 5 seconds
+            setTimeout(() => {
+                const flashes = document.querySelectorAll('.flash');
+                flashes.forEach(flash => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500);
+                });
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

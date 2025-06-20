@@ -1,0 +1,995 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Chuckles - Bello Family</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --secondary: #2B4162;
+            --accent: #FFD166;
+            --light: #F8F9FA;
+            --dark: #212529;
+            --success: #06D6A0;
+            --warning: #FFD166;
+            --danger: #EF476F;
+            --family-color: #8A5A44;
+            --gradient-start: #FF6B35;
+            --gradient-end: #FF9E58;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="%23FFD166" stroke-width="1" stroke-opacity="0.1"/></svg>');
+            background-size: 10px 10px;
+            z-index: -1;
+        }
+        
+        .parallax {
+            perspective: 1px;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        
+        .parallax-layer-base {
+            transform: translateZ(0);
+        }
+        
+        .parallax-layer-back {
+            transform: translateZ(-1px) scale(2);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+       
+        header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Pacifico', cursive;
+            font-size: 1.8rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .logo i {
+            color: var(--accent);
+            font-size: 2.2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(255,255,255,0.85);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.5rem;
+            color: var(--family-color);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--secondary);
+        }
+        
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            color: white;
+            box-shadow: 0 5px 15px rgba(255,107,53,0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff5a1f, #ff8c42);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: white;
+            position: relative;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-family: 'Pacifico', cursive;
+            color: var(--family-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            border-top: 5px solid var(--primary);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,158,88,0.1));
+            font-size: 3rem;
+            color: var(--primary);
+        }
+        
+        .feature-content {
+            padding: 2rem;
+        }
+        
+        .feature-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        /* Family Oriki Section */
+        .oriki {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, rgba(43,65,98,0.9), rgba(43,65,98,0.95)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232B4162"/><path d="M20,20 Q40,5 60,20 T100,20 M20,50 Q40,35 60,50 T100,50 M20,80 Q40,65 60,80 T100,80" stroke="%233A506B" stroke-width="2" fill="none"/></svg>');
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .oriki-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .oriki-content h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            color: var(--accent);
+        }
+        
+        .oriki-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-style: italic;
+            background: rgba(0,0,0,0.2);
+            padding: 2rem;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .oriki-text::before, .oriki-text::after {
+            content: "";
+            font-size: 4rem;
+            color: var(--accent);
+            position: absolute;
+            opacity: 0.3;
+        }
+        
+        .oriki-text::before {
+            top: -20px;
+            left: 10px;
+        }
+        
+        .oriki-text::after {
+            bottom: -40px;
+            right: 10px;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-logo {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .footer-links h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255,107,53,0.7);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 15px rgba(255,107,53,0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255,107,53,0);
+            }
+        }
+        
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .auth-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 2.5rem 2rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .auth-header h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-body {
+            padding: 2.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.2);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid #edf2f7;
+            font-size: 0.95rem;
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard-container {
+            padding: 2rem 0;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .welcome-section h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+        
+        .ranking-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .ranking-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .ranking-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .ranking-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+        
+        .rank {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent);
+            color: var(--dark);
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+        
+        .rank-1 {
+            background: gold;
+        }
+        
+        .rank-2 {
+            background: silver;
+        }
+        
+        .rank-3 {
+            background: #cd7f32; /* bronze */
+        }
+        
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .member-amount {
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .admin-badge {
+            background: var(--primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .oriki-btn {
+            background: var(--family-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .oriki-btn:hover {
+            background: #6e4533;
+            transform: translateY(-3px);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 1.5rem;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            text-align: center;
+        }
+        
+        .modal-header h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-body p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .hero-btns {
+                flex-direction: column;
+            }
+            
+            .auth-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax">
+        <div class="parallax-layer parallax-layer-back">
+            <!-- Background elements would go here -->
+        </div>
+        <div class="parallax-layer parallax-layer-base">
+            <!-- Header -->
+            <header>
+                <div class="container header-content">
+                    <div class="logo">
+                        <i class="fas fa-crown"></i>
+                        <span>Royal Chuckles</span>
+                    </div>
+                    <nav>
+                        <ul>
+                            <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                            <li><a href="#"><i class="fas fa-users"></i> Family</a></li>
+                            <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                            <li><a href="#"><i class="fas fa-envelope"></i> Contact</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="container hero-content">
+                    <h1>Welcome to the Royal Chuckles Family!</h1>
+                    <p>Join us in planning the most memorable picnic next year. Contribute, connect, and celebrate with the Bello family in a fun and organized way.</p>
+                    
+                    <div class="hero-btns">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary pulse">
+                            <i class="fas fa-user-plus"></i> Join Our Family
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline">
+                            <i class="fas fa-sign-in-alt"></i> Family Login
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Floating decorative elements -->
+                <div style="position: absolute; top: 20%; right: 10%; z-index: 1;" class="floating">
+                    <i class="fas fa-picnic-basket" style="font-size: 8rem; color: rgba(255,107,53,0.2);"></i>
+                </div>
+                <div style="position: absolute; bottom: 30%; left: 5%; z-index: 1;" class="floating" style="animation-delay: 0.5s;">
+                    <i class="fas fa-tree" style="font-size: 6rem; color: rgba(43,65,98,0.2);"></i>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>Family Features</h2>
+                        <p>Our family platform makes it easy to contribute, communicate, and stay connected</p>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3>Contribution Tracking</h3>
+                                <p>Easily track your contributions, see your progress, and view your family's total savings for our big picnic.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3>Family Messaging</h3>
+                                <p>Stay connected with all family members through our private messaging system and group announcements.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3>Progress Ranking</h3>
+                                <p>See how everyone is contributing in our friendly family leaderboard - a little healthy competition never hurt!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Family Oriki Section -->
+            <section class="oriki">
+                <div class="container oriki-content">
+                    <h2>Our Family Oriki</h2>
+                    <div class="oriki-text">
+                        We are the Royal Chuckles, descendants of the great Bello lineage. 
+                        Our family is known for its wisdom, strength, and unity. 
+                        We cherish our heritage and uphold the values passed down through generations. 
+                        With laughter in our hearts and love in our souls, we stand together as one. 
+                        May our family continue to prosper and bring joy to all who know us.
+                    </div>
+                    <button class="btn btn-primary" id="viewOrikiBtn">
+                        <i class="fas fa-book-open"></i> View Full Oriki
+                    </button>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer>
+                <div class="container">
+                    <div class="footer-content">
+                        <div class="footer-about">
+                            <div class="footer-logo">Royal Chuckles</div>
+                            <p>The Bello family platform for planning our annual picnic and staying connected throughout the year.</p>
+                        </div>
+                        
+                        <div class="footer-links">
+                            <h3>Quick Links</h3>
+                            <ul>
+                                <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                                <li><a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                                <li><a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a></li>
+                                <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="footer-links">
+                            <h3>Contact</h3>
+                            <ul>
+                                <li><i class="fas fa-map-marker-alt"></i> Oyo, Nigeria</li>
+                                <li><i class="fas fa-envelope"></i> bb2010ng@gmail.com</li>
+                                <li><i class="fas fa-phone"></i> +234 916 070 7115</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="copyright">
+                        &copy; 2025 Royal Chuckles (Bello Family). All rights reserved.
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Oriki Modal -->
+    <div class="modal" id="orikiModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Oriki of the Royal Chuckles</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>We are the Royal Chuckles, descendants of the great Bello lineage. 
+                Our family is known for its wisdom, strength, and unity. 
+                We cherish our heritage and uphold the values passed down through generations.</p>
+                
+                <p>Our ancestors were leaders in their communities, known for their generosity and wisdom. 
+                They taught us the importance of family, respect for elders, and the value of hard work.</p>
+                
+                <p>We are the children of the lion, fearless and strong. 
+                We are the children of the eagle, with vision that sees far and wide. 
+                We are the children of the river, flowing with life and abundance.</p>
+                
+                <p>In times of joy, we celebrate together. 
+                In times of challenge, we support each other. 
+                Our laughter is medicine, our bond unbreakable.</p>
+                
+                <p>May our family continue to prosper and bring joy to all who know us. 
+                May we always remember who we are and where we come from. 
+                We are the Royal Chuckles - the pride of the Bello family.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Oriki Modal
+        document.getElementById('viewOrikiBtn').addEventListener('click', function() {
+            document.getElementById('orikiModal').style.display = 'flex';
+        });
+        
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('orikiModal').style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('orikiModal')) {
+                document.getElementById('orikiModal').style.display = 'none';
+            }
+        });
+        
+        // Parallax effect
+        window.addEventListener('scroll', function() {
+            const scrollY = window.scrollY;
+            const backLayer = document.querySelector('.parallax-layer-back');
+            backLayer.style.transform = `translateZ(-1px) scale(2) translateY(${scrollY * 0.5}px)`;
+        });
+        
+        // Animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.feature-card, .oriki-content').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
