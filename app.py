@@ -16,6 +16,10 @@ from functools import wraps
 # Add this at the top with other imports
 import logging
 from io import BytesIO
+import shutil
+import tempfile
+from flask import make_response
+
 
 
 # Configure logging
@@ -35,6 +39,10 @@ app.config['MAX_AUDIO_SIZE'] = 1024 * 1024 * 1024  # 1024MB max for audio
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['AUDIO_UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['VIDEO_UPLOAD_FOLDER'], exist_ok=True)
+
+# Add this configuration
+app.config['CHUNK_UPLOAD_FOLDER'] = 'static/chunks'
+os.makedirs(app.config['CHUNK_UPLOAD_FOLDER'], exist_ok=True)
 
 
 db = SQLAlchemy(app)
@@ -274,6 +282,195 @@ def is_online(user):
     if not user.last_seen:
         return False
     return (datetime.utcnow() - user.last_seen).total_seconds() < 120
+
+# Add these imports at the top
+
+
+# Update the /upload_chunk endpoint
+@app.route('/upload_chunk', methods=['POST'])
+def upload_chunk():
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        # Get chunk information
+        chunk = request.files.get('chunk')
+        if not chunk:
+            return jsonify({'error': 'No chunk provided'}), 400
+            
+        chunk_index = int(request.form.get('chunkIndex', -1))
+        total_chunks = int(request.form.get('totalChunks', -1))
+        file_type = request.form.get('fileType')
+        unique_id = request.form.get('uniqueId')
+        extension = request.form.get('extension')
+        
+        # Validate required parameters
+        if chunk_index < 0 or total_chunks < 0 or not file_type or not unique_id or not extension:
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        # Create directory for this upload
+        chunk_dir = os.path.join(app.config['CHUNK_UPLOAD_FOLDER'], unique_id)
+        os.makedirs(chunk_dir, exist_ok=True)
+        
+        # Save chunk
+        chunk_path = os.path.join(chunk_dir, f'chunk_{chunk_index}')
+        chunk.save(chunk_path)
+        
+        # Check if all chunks have been uploaded
+        if chunk_index == total_chunks - 1:
+            return assemble_file(unique_id, file_type, extension)
+        
+        return jsonify({'success': True, 'received': chunk_index})
+    
+    except Exception as e:
+        app.logger.error(f"Error in upload_chunk: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Update the assemble_file function
+def assemble_file(unique_id, file_type, extension):
+    try:
+        chunk_dir = os.path.join(app.config['CHUNK_UPLOAD_FOLDER'], unique_id)
+        
+        # Get all chunks and sort them
+        chunks = []
+        for f in os.listdir(chunk_dir):
+            if f.startswith('chunk_'):
+                try:
+                    index = int(f.split('_')[1])
+                    chunks.append((index, f))
+                except (IndexError, ValueError):
+                    continue
+                    
+        chunks.sort(key=lambda x: x[0])
+        
+        # Verify we have all chunks
+        expected_chunks = set(range(len(chunks)))
+        actual_chunks = set(idx for idx, _ in chunks)
+        if expected_chunks != actual_chunks:
+            return jsonify({
+                'error': f'Missing chunks. Expected {len(expected_chunks)}, got {len(actual_chunks)}'
+            }), 400
+        
+        # Determine output folder
+        if file_type == 'image':
+            folder = app.config['UPLOAD_FOLDER']
+        elif file_type == 'audio':
+            folder = app.config['AUDIO_UPLOAD_FOLDER']
+        elif file_type == 'video':
+            folder = app.config['VIDEO_UPLOAD_FOLDER']
+        else:
+            return jsonify({'error': 'Invalid file type'}), 400
+        
+        # Create final filename
+        unique_filename = f"{file_type}_{uuid.uuid4().hex}.{extension}"
+        final_path = os.path.join(folder, unique_filename)
+        
+        # Combine chunks
+        with open(final_path, 'wb') as outfile:
+            for idx, chunk_name in chunks:
+                with open(os.path.join(chunk_dir, chunk_name), 'rb') as infile:
+                    outfile.write(infile.read())
+        
+        # Clean up chunks
+        shutil.rmtree(chunk_dir)
+        
+        return jsonify({
+            'success': True,
+            'filename': unique_filename,
+            'url': f'/{file_type}/{unique_filename}',
+            'type': file_type
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error assembling file: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Update the existing upload_media route to use chunked uploads
+# Update the /upload_media endpoint
+@app.route('/upload_media', methods=['POST'])
+def upload_media():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    # For chunked upload initialization
+    if request.form.get('init_chunked'):
+        unique_id = uuid.uuid4().hex
+        file_type = request.form.get('file_type')
+        ext = request.form.get('extension')
+        
+        if not file_type or not ext:
+            return jsonify({'error': 'Missing file information'}), 400
+        
+        # Create directory for this upload
+        chunk_dir = os.path.join(app.config['CHUNK_UPLOAD_FOLDER'], unique_id)
+        os.makedirs(chunk_dir, exist_ok=True)
+        
+        return jsonify({
+            'chunked': True,
+            'uniqueId': unique_id,
+            'fileType': file_type,
+            'extension': ext
+        })
+    
+    # For direct small file upload
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    
+    file = request.files['file']
+    return handle_direct_upload(file)
+
+# Add this helper function for file type detection
+def get_file_type_and_extension(filename):
+    if '.' not in filename:
+        return None, None
+    
+    ext = filename.rsplit('.', 1)[1].lower()
+    
+    image_ext = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'tfif'}
+    audio_ext = {'mp3', 'wav', 'ogg', 'webm'}
+    video_ext = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
+    
+    if ext in image_ext:
+        return 'image', ext
+    if ext in audio_ext:
+        return 'audio', ext
+    if ext in video_ext:
+        return 'video', ext
+    
+    return None, ext
+
+def handle_direct_upload(file):
+    # Determine file type
+    file_type = file.content_type.split('/')[0]  # image, audio, video
+    
+    # Validate and save file
+    if file_type == 'image':
+        folder = app.config['UPLOAD_FOLDER']
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'tfif'}
+    elif file_type == 'audio':
+        folder = app.config['AUDIO_UPLOAD_FOLDER']
+        allowed_extensions = {'mp3', 'wav', 'ogg', 'webm'}
+    elif file_type == 'video':
+        folder = app.config['VIDEO_UPLOAD_FOLDER']
+        allowed_extensions = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
+    else:
+        return jsonify({'error': 'Unsupported file type'}), 400
+    
+    # Generate unique filename
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    if '.' not in file.filename or ext not in allowed_extensions:
+        return jsonify({'error': 'Invalid file type'}), 400
+    
+    unique_filename = f"{file_type}_{uuid.uuid4().hex}.{ext}"
+    file_path = os.path.join(folder, unique_filename)
+    file.save(file_path)
+    
+    return jsonify({
+        'success': True,
+        'filename': unique_filename,
+        'url': f'/{file_type}/{unique_filename}',
+        'type': file_type
+    })
 
 # Routes
 @app.route('/')
@@ -876,48 +1073,7 @@ def get_messages(receiver_id):
         'receiver': receiver_info
     })
 
-@app.route('/upload_media', methods=['POST'])
-def upload_media():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Not authenticated'}), 401
-    
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    # Determine file type
-    if file.content_type.startswith('image/'):
-        folder = app.config['UPLOAD_FOLDER']
-        url_prefix = 'uploads'
-    elif file.content_type.startswith('audio/'):
-        folder = app.config['AUDIO_FOLDER']
-        url_prefix = 'audio'
-    elif file.content_type.startswith('video/'):
-        folder = app.config['VIDEO_FOLDER']
-        url_prefix = 'video'
-    else:
-        return jsonify({'error': 'Unsupported file type'}), 400
-    
-    # Save file
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    type_prefix = file.content_type.split('/')[0]
-    filename = f"{type_prefix}_{uuid.uuid4().hex}.{ext}"  # e.g. "video_abc123.mp4"
-    file_path = os.path.join(folder, filename)
-    
-    try:
-        file.save(file_path)
-        return jsonify({
-            'success': True,
-            'filename': filename,
-            'url': f"/{url_prefix}/{filename}",
-            'type': file.content_type.split('/')[0]
-        })
-    except Exception as e:
-        logger.error(f"Error saving media file: {str(e)}")
-        return jsonify({'error': 'Error saving file'}), 500
+
 
 @app.route('/upload_audio', methods=['POST'])
 def upload_audio():

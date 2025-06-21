@@ -2497,6 +2497,90 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 scrollToBottomBtn.style.display = 'none';
             }
+            // Updated file upload handler
+// Update the handleFileUpload function
+async function handleFileUpload(file) {
+    // For files larger than 5MB, use chunked upload
+    if (file.size > 5 * 1024 * 1024) {
+        // Get file type and extension
+        const file_type = file.type.split('/')[0];
+        let ext = file.name.split('.').pop().toLowerCase();
+        if (!ext) {
+            // Fallback based on file type
+            if (file_type === 'image') ext = 'jpg';
+            else if (file_type === 'audio') ext = 'webm';
+            else if (file_type === 'video') ext = 'mp4';
+            else ext = 'bin';
+        }
+        
+        // Initialize chunked upload
+        const initResponse = await fetch('/upload_media', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: new URLSearchParams({
+                'init_chunked': 'true',
+                'file_type': file_type,
+                'extension': ext
+            })
+        });
+        
+        const initData = await initResponse.json();
+        if (!initData.chunked) {
+            return initData;
+        }
+        
+        return uploadChunked(file, initData);
+    }
+    
+    // For small files, use direct upload
+    return uploadSmallFile(file);
+}
+
+async function uploadSmallFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('/upload_media', {
+        method: 'POST',
+        body: formData
+    });
+    
+    return response.json();
+}
+
+// Update the uploadChunked function
+async function uploadChunked(file, initData) {
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 1MB chunks
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const { uniqueId, fileType, extension } = initData;
+    
+    // Upload chunks
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(file.size, start + CHUNK_SIZE);
+        const chunk = file.slice(start, end);
+        
+        const formData = new FormData();
+        formData.append('chunk', chunk);
+        formData.append('chunkIndex', chunkIndex);
+        formData.append('totalChunks', totalChunks);
+        formData.append('fileType', fileType);
+        formData.append('uniqueId', uniqueId);
+        formData.append('extension', extension);
+        
+        const response = await fetch('/upload_chunk', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        // Return final file info on last chunk
+        if (chunkIndex === totalChunks - 1) {
+            return data;
+        }
+    }
+}
             function resetChatPanel() {
                 // Clear chat messages
                 chatMessages.innerHTML = '';
@@ -3288,44 +3372,37 @@
             // F. Media Handling
             // ========================
             // Handle media file selection
-            mediaInput.addEventListener('change', async function(e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-            
-            // Clear previous files
-            mediaFiles = [];
-            mediaPreview.innerHTML = '';
-            mediaPreview.style.display = 'grid';
-            
-            // Upload each file and show preview
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('file', file);
+            // Update the mediaInput change handler
+mediaInput.addEventListener('change', async function(e) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Clear previous files
+    mediaFiles = [];
+    mediaPreview.innerHTML = '';
+    mediaPreview.style.display = 'grid';
+    
+    // Upload each file and show preview
+    for (const file of files) {
+        try {
+            const data = await handleFileUpload(file);
+            if (data.success) {
+                // Add to mediaFiles array
+                mediaFiles.push({
+                    filename: data.filename,
+                    type: data.type
+                });
                 
-                try {
-                    const response = await fetch('/upload_media', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        // Add to mediaFiles array
-                        mediaFiles.push({
-    filename: data.filename,
-    type: data.type
-    });
-                        
-                        // Show preview
-                        addMediaPreview(data.filename, data.type);
-                    } else {
-                        console.error('Error uploading file:', data.error);
-                    }
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                }
+                // Show preview
+                addMediaPreview(data.filename, data.type);
+            } else {
+                console.error('Error uploading file:', data.error);
             }
-        });
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    }
+});
         
         // Show media previews
         function addMediaPreview(filename, type) {
