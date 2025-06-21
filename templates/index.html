@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Royal Chuckles - Bello Family</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -98,7 +99,8 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 15%;
+            flex-direction: row;
             font-family: 'Pacifico', cursive;
             font-size: 1.8rem;
             color: white;
@@ -789,17 +791,11 @@
             <header>
                 <div class="container header-content">
                     <div class="logo">
-                        <i class="fas fa-crown"></i>
+                        <img src="{{ url_for('static', filename='favicon.ico') }}" style="height: 15%; width: 15%;">
                         <span>Royal Chuckles</span>
+                        <img src="{{ url_for('static', filename='favicon.ico') }}" style="height: 15%; width: 15%;">
                     </div>
-                    <nav>
-                        <ul>
-                            <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                            <li><a href="#"><i class="fas fa-users"></i> Family</a></li>
-                            <li><a href="#"><i class="fas fa-calendar-alt"></i> Events</a></li>
-                            <li><a href="#"><i class="fas fa-envelope"></i> Contact</a></li>
-                        </ul>
-                    </nav>
+                    
                 </div>
             </header>
 
