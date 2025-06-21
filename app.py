@@ -608,69 +608,74 @@ def album():
 def upload_image():
     if 'user_id' not in session:
         flash('Please login to upload images', 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('album'))
     
     user = User.query.get(session['user_id'])
     family = get_family()
     
-    app.logger.debug(f"Files in request: {request.files}")
+    # Get all uploaded files
+    files = request.files.getlist('image')
+    caption = request.form.get('caption', '')
     
-    # Check if the post request has the file part
-    if 'image' not in request.files:
-        flash('No file part in request', 'danger')
+    if len(files) == 0:
+        flash('No files selected', 'danger')
         return redirect(url_for('album'))
     
-    file = request.files['image']
-    
-    # If user does not select file, browser submits empty file without filename
-    if file.filename == '':
-        flash('No selected file', 'danger')
-        return redirect(url_for('album'))
-    
-    # Validate image
+    success_count = 0
+    error_count = 0
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'tfif'}
-    if not allowed_file(file.filename, allowed_extensions):
-        flash('Invalid file type. Allowed: PNG, JPG, JPEG, GIF, WEBP, TFIF', 'danger')
-        return redirect(url_for('album'))
     
-    try:
-        # Generate unique filename
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"album_{uuid.uuid4().hex}.{ext}"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+    for file in files:
+        if file.filename == '':
+            error_count += 1
+            continue
+            
+        # Validate image
+        if not allowed_file(file.filename, allowed_extensions):
+            error_count += 1
+            continue
         
-        # Save original file
-        file.save(file_path)
-        
-        # Create thumbnail
-        thumb_filename = f"thumb_{unique_filename}"
-        thumb_path = os.path.join(app.config['UPLOAD_FOLDER'], thumb_filename)
-        
-        # Create thumbnail (300x300)
-        img = Image.open(file_path)
-        img.thumbnail((300, 300))
-        img.save(thumb_path)
-        
-        # Get caption
-        caption = request.form.get('caption', '')
-        
-        # Save to database
-        new_image = AlbumImage(
-            filename=unique_filename,
-            thumbnail=thumb_filename,
-            uploaded_by=user.id,
-            caption=caption
-        )
-        db.session.add(new_image)
-        db.session.commit()
-        
-        flash('Image uploaded successfully!', 'success')
-        return redirect(url_for('album'))
+        try:
+            # Generate unique filename
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            unique_filename = f"album_{uuid.uuid4().hex}.{ext}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            
+            # Save original file
+            file.save(file_path)
+            
+            # Create thumbnail
+            thumb_filename = f"thumb_{unique_filename}"
+            thumb_path = os.path.join(app.config['UPLOAD_FOLDER'], thumb_filename)
+            
+            # Create thumbnail (300x300)
+            img = Image.open(file_path)
+            img.thumbnail((300, 300))
+            img.save(thumb_path)
+            
+            # Save to database
+            new_image = AlbumImage(
+                filename=unique_filename,
+                thumbnail=thumb_filename,
+                uploaded_by=user.id,
+                caption=caption
+            )
+            db.session.add(new_image)
+            success_count += 1
+            
+        except Exception as e:
+            app.logger.error(f"Error uploading image: {str(e)}")
+            error_count += 1
     
-    except Exception as e:
-        app.logger.error(f"Error uploading image: {str(e)}")
-        flash(f'Error uploading image: {str(e)}', 'danger')
-        return redirect(url_for('album'))
+    # Commit all successful uploads at once
+    db.session.commit()
+    
+    if success_count > 0:
+        flash(f'Successfully uploaded {success_count} image(s)!', 'success')
+    if error_count > 0:
+        flash(f'Failed to upload {error_count} image(s)', 'danger')
+    
+    return redirect(url_for('album'))
 
 @app.route('/delete_image/<int:image_id>', methods=['POST'])
 @admin_required
@@ -745,6 +750,7 @@ def dashboard():
     
     user = User.query.get(session['user_id'])
     family = get_family()
+    
     
     if not user or not family:
         flash('Family not set up', 'danger')

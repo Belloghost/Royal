@@ -1250,34 +1250,34 @@
             </div>
             
             <form method="POST" action="{{ url_for('upload_image') }}" enctype="multipart/form-data" id="uploadForm">
-    <div class="upload-form">
-        <div class="upload-area" id="uploadTrigger">
-            <i class="fas fa-images" id="uploadIcon"></i>
-            <h3 id="uploadTitle">Upload Your Photo</h3>
-            <p id="uploadText">Click or drag & drop your image here</p>
-            <button type="button" class="upload-btn" id="browseBtn">
-                <i class="fas fa-folder-open"></i> Browse Files
-            </button>
-            <input type="file" class="upload-input" id="imageUpload" name="image" accept="image/*" required>
-        </div>
-        
-        <div class="caption-area">
-            <label for="imageCaption"><i class="fas fa-pen-alt"></i> Add a Caption</label>
-            <textarea 
-                id="imageCaption" 
-                class="caption-textarea" 
-                name="caption"
-                placeholder="Describe this memory..."
-            ></textarea>
-        </div>
-        
-        <div class="submit-area">
-            <button type="submit" class="submit-btn" id="submitBtn">
-                <i class="fas fa-upload"></i> Upload to Family Album
-            </button>
-        </div>
-    </div>
-</form>
+                <div class="upload-form">
+                    <div class="upload-area" id="uploadTrigger">
+                        <i class="fas fa-images" id="uploadIcon"></i>
+                        <h3 id="uploadTitle">Upload Your Photos</h3>  <!-- Changed text -->
+                        <p id="uploadText">Click or drag & drop multiple images</p>  <!-- Changed text -->
+                        <button type="button" class="upload-btn" id="browseBtn">
+                            <i class="fas fa-folder-open"></i> Browse Files
+                        </button>
+                        <input type="file" class="upload-input" id="imageUpload" name="image" accept="image/*" required multiple>  <!-- Added multiple attribute -->
+                    </div>
+                    
+                    <div class="caption-area">
+                        <label for="imageCaption"><i class="fas fa-pen-alt"></i> Add a Caption</label>
+                        <textarea 
+                            id="imageCaption" 
+                            class="caption-textarea" 
+                            name="caption"
+                            placeholder="Describe these memories..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="submit-area">
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-upload"></i> Upload to Family Album
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
         
         <div class="section-title">
@@ -1682,9 +1682,10 @@
             document.getElementById('imageUpload').click();
         });
         
+        // Update the file input change handler
         document.getElementById('imageUpload').addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const fileName = this.files[0].name;
+            if (this.files && this.files.length > 0) {
+                const fileCount = this.files.length;
                 const uploadIcon = document.getElementById('uploadIcon');
                 const uploadTitle = document.getElementById('uploadTitle');
                 const uploadText = document.getElementById('uploadText');
@@ -1692,20 +1693,20 @@
                 
                 uploadIcon.className = 'fas fa-check-circle';
                 uploadIcon.style.color = '#4CAF50';
-                uploadTitle.textContent = 'File Selected';
-                uploadText.textContent = fileName;
-                browseBtn.innerHTML = '<i class="fas fa-sync"></i> Change File';
+                uploadTitle.textContent = `${fileCount} Files Selected`;
+                uploadText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} ready for upload`;
+                browseBtn.innerHTML = '<i class="fas fa-sync"></i> Change Files';
             }
         });
-        
-        // Form submission handling
+
+        // Update form submission handling
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             const fileInput = document.getElementById('imageUpload');
             const submitBtn = document.getElementById('submitBtn');
             
             if (!fileInput.files || fileInput.files.length === 0) {
                 e.preventDefault();
-                alert('Please select an image to upload!');
+                alert('Please select at least one image to upload!');
                 return;
             }
             
