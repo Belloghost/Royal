@@ -2550,7 +2550,7 @@ async function uploadSmallFile(file) {
 
 // Update the uploadChunked function
 async function uploadChunked(file, initData) {
-    const CHUNK_SIZE = 5 * 1024 * 1024; // 1MB chunks
+    const CHUNK_SIZE = 10 * 1024 * 1024; // 1MB chunks
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     const { uniqueId, fileType, extension } = initData;
     
