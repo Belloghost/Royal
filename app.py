@@ -287,7 +287,7 @@ def register():
     
     if not family or not head_user:
         flash('Family not set up yet. Please contact the head of the family.', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     if request.method == 'POST':
         name = request.form['name']
@@ -539,7 +539,7 @@ def logout():
             user.last_seen = datetime.utcnow()
             db.session.commit()
     session.pop('user_id', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 @app.route('/dashboard')
 def dashboard():
@@ -551,7 +551,7 @@ def dashboard():
     
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Update last seen
     user.last_seen = datetime.utcnow()
@@ -618,7 +618,7 @@ def profile():
     
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Update last seen
     user.last_seen = datetime.utcnow()
@@ -682,7 +682,7 @@ def profile_questions():
     user = User.query.get(session['user_id'])
     if not user:
         flash('User not found', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Get or create profile
     profile = user.profile
@@ -722,7 +722,7 @@ def family_directory():
     family = get_family()
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Get all family members with their profiles
     family_members = User.query.filter_by(family_code=family.code).all()
@@ -771,7 +771,7 @@ def messages():
     family = get_family()
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Update last seen
     user.last_seen = datetime.utcnow()
@@ -804,11 +804,20 @@ def get_messages(receiver_id):
     # Get last message ID from query parameter
     last_message_id = request.args.get('last_id', 0, type=int)
     
-    # Filter messages
-    query = Message.query.filter(
-        ((Message.sender_id == user_id) & (Message.receiver_id == receiver_id)) |
-        ((Message.sender_id == receiver_id) & (Message.receiver_id == user_id))
-    )
+    # Handle self-chat scenario
+    if receiver_id == user_id:
+        # Filter messages where sender and receiver are the same user
+        query = Message.query.filter(
+            (Message.sender_id == user_id) & 
+            (Message.receiver_id == user_id)
+        )
+    else:
+        # Normal conversation
+        query = Message.query.filter(
+            ((Message.sender_id == user_id) & (Message.receiver_id == receiver_id)) |
+            ((Message.sender_id == receiver_id) & (Message.receiver_id == user_id))
+        )
+
     
     if last_message_id:
         query = query.filter(Message.id > last_message_id)
@@ -1073,7 +1082,7 @@ def notices():
     
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Update last seen
     user.last_seen = datetime.utcnow()
@@ -1091,7 +1100,7 @@ def admin_dashboard():
     
     if not user or not family:
         flash('Family not set up', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
     # Update last seen
     user.last_seen = datetime.utcnow()
@@ -1278,4 +1287,4 @@ def internal_server_error(e):
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)

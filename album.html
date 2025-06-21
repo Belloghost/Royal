@@ -1,0 +1,1765 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Memories | {{ family.name }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a5acd;
+            --primary-dark: #5649b8;
+            --secondary: #ff7e5f;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --transition: all 0.3s ease;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 15px 45px rgba(0, 0, 0, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .album-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .album-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            padding-top: 20px;
+        }
+        
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .header h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 20px auto;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 15px 25px;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-box i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .stat-box .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        
+        .stat-box .label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2eaf3 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow);
+            border: 2px dashed #c2d6f0;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #e8eff7 0%, #d9e5f1 100%);
+        }
+        
+        .upload-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background: var(--primary);
+            border-radius: 0 0 0 100px;
+            opacity: 0.1;
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title i {
+            background: var(--primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .upload-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #a0b9d9;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 250px;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #f8fbff;
+        }
+        
+        .upload-area i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .upload-area h3 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        
+        .upload-area p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        
+        .upload-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+        }
+        
+        .upload-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 90, 205, 0.4);
+        }
+        
+        .upload-btn i {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .upload-input {
+            display: none;
+        }
+        
+        .caption-area {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .caption-area label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .caption-textarea {
+            flex-grow: 1;
+            border: 1px solid #d1dbe7;
+            border-radius: 15px;
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: none;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .caption-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+        }
+        
+        .submit-area {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .submit-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.3);
+        }
+        
+        .submit-btn:hover {
+            background: #ff6b4d;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.4);
+        }
+        
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            aspect-ratio: 1/1;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-card:hover .image-container img {
+            transform: scale(1.1);
+        }
+        
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 20px;
+            color: white;
+            opacity: 0;
+            transition: var(--transition);
+            transform: translateY(20px);
+        }
+        
+        .image-card:hover .image-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .image-overlay .caption {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .image-overlay .uploader {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .image-overlay .date {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .image-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .image-card:hover .image-actions {
+            opacity: 1;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .action-btn.download:hover {
+            color: var(--primary);
+        }
+        
+        .action-btn.delete:hover {
+            color: #ff4d4d;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            gap: 10px;
+        }
+        
+        .page-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light);
+            color: var(--dark);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .page-btn:hover, .page-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+        }
+        
+        .page-btn i {
+            font-size: 1.2rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .image-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .image-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .upload-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .submit-area {
+                grid-column: span 1;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .image-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+            }
+            
+            .album-container {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stat-box {
+                min-width: 120px;
+                padding: 12px 20px;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .image-card {
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+        
+        /* Flash messages */
+        .flash-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .flash-message {
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+        }
+        
+        .flash-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .flash-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .flash-info {
+            background: #2196F3;
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        /* Hamburger Menu Styles */
+        .menu-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        /* Unique Hamburger Menu */
+        .hamburger {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 1100;
+            transition: transform 0.5s ease;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hamburger:hover {
+            transform: rotate(90deg);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .line {
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(to right, #ffd700, #ff8c00);
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .line:nth-child(1) {
+            transform-origin: top left;
+        }
+        
+        .line:nth-child(3) {
+            transform-origin: bottom left;
+        }
+        
+        /* Menu Content */
+        .menu-content {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(10, 15, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 215, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            padding: 100px 30px 30px;
+            transition: right 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        
+        .menu-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.05), rgba(255, 140, 0, 0.05), rgba(139, 0, 0, 0.05));
+            z-index: -1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-right: 15px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        .logo span {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(10px);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+        
+        .nav-link i {
+            width: 30px;
+            font-size: 1.2rem;
+            color: #ffd700;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: scale(1.3);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        .nav-link span {
+            flex: 1;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        
+        .user-menu {
+            margin-top: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .user-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+        }
+        
+        .user-role {
+            font-size: 0.9rem;
+            color: #aaa;
+            display: block;
+        }
+        
+        .logout-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.3);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        /* Animation Classes */
+        .menu-open .menu-content {
+            right: 0;
+        }
+        
+        .menu-open .line:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+            width: 45px;
+        }
+        
+        .menu-open .line:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        
+        .menu-open .line:nth-child(3) {
+            transform: rotate(-45deg) translate(8px, -8px);
+            width: 45px;
+        }
+        
+        .menu-open .hamburger {
+            transform: rotate(180deg);
+        }
+        
+        /* Animation for menu items */
+        .menu-item {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.4s ease;
+        }
+        
+        .menu-open .menu-item {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Prevent body scroll when menu is open */
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-content {
+                width: 300px;
+            }
+            
+            .hamburger {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .menu-content {
+                width: 100%;
+                right: -100%;
+            }
+        }
+         /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            display: block;
+            margin: 0 auto;
+            cursor: zoom-in;
+        }
+        
+        .modal-content.zoomed {
+            transform: translate(-50%, -50%) scale(1.5);
+            cursor: grab;
+        }
+        
+        .modal-content.zoomed img {
+            cursor: grab;
+        }
+        
+        .modal-content.dragging {
+            cursor: grabbing;
+        }
+        
+        .modal-content.dragging img {
+            cursor: grabbing;
+        }
+        
+        .modal-caption {
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 1.2rem;
+            max-width: 80%;
+            margin: 0 auto;
+        }
+        
+        .modal-meta {
+            color: #aaa;
+            text-align: center;
+            padding: 5px 15px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #ff7e5f;
+            transform: rotate(90deg);
+        }
+        
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .modal-prev {
+            left: 20px;
+        }
+        
+        .modal-next {
+            right: 20px;
+        }
+        
+        .modal-tools {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        .modal-tool {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-tool:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .download-tool:hover {
+            background: rgba(106, 90, 205, 0.5);
+        }
+        
+        .zoom-tool:hover {
+            background: rgba(255, 126, 95, 0.5);
+        }
+        
+        /* Mobile Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            display: none;
+        }
+        
+        .zoom-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .modal-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .modal-tool {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            
+            .zoom-controls {
+                display: flex;
+            }
+            
+            .modal-content.zoomed {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content.zoomed {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            
+            .zoom-controls {
+                bottom: 70px;
+            }
+            
+            .zoom-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+        
+        /* Animation for modal */
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .image-modal {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="album-container">
+        <!-- Flash messages -->
+        <div class="flash-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        <!-- Hamburger Menu -->
+        <div class="menu-container">
+            <div class="hamburger" id="hamburger">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+            </div>
+            
+            <div class="menu-content" id="menuContent">
+                <div class="logo menu-item">
+                    <img src="{{ url_for('static', filename='favicon.ico') }}" style="height: 100%; width: 100%;">
+                    <span>Royal Chuckles</span>
+                </div>
+                
+                <div class="nav-menu">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('messages') }}" class="nav-link menu-item">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                    </a>
+                    <a href="{{ url_for('notices') }}" class="nav-link menu-item">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Notices</span>
+                    </a>
+                    <a href="{{ url_for('profile') }}" class="nav-link menu-item">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="{{ url_for('album') }}" class="nav-link active menu-item">
+                        <i class="fas fa-image"></i>
+                        <span>Family Album</span>
+                    </a>
+                    <a href="{{ url_for('profile_questions') }}" class="nav-link menu-item">
+                        <i class="fas fa-question"></i>
+                        <span>Update Your Info</span>
+                    </a>
+                    <a href="{{ url_for('family_directory') }}" class="nav-link menu-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>Learn About Your Family</span>
+                    </a>
+                    {% if user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Admin Panel</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="user-menu">
+                    <div class="user-profile menu-item">
+                        <div class="member-avatar">
+                            {% if user.profile_pic != 'default.jpg' %}
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" 
+                                        alt="{{ user.name }}" style="width:100%;height:100%;border-radius:50%;">
+                            {% else %}
+                                {{ user.name[0] }}
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">{{ user.name }}</span>
+                            <span class="user-role">
+                                {% if user.is_head %}Family Head{% elif user.is_admin %}Admin{% else %}Member{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('logout') }}" class="logout-btn menu-item">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header">
+            <h1><i class="fas fa-camera-retro"></i> Family Memories</h1>
+            <p>Capture and cherish every precious moment with your loved ones. Our family album holds memories that last a lifetime.</p>
+            
+            <div class="stats">
+                <div class="stat-box" style="display: none;">
+                    <i class="fas fa-images"></i>
+                    <div class="number">{{ total_images }}</div>
+                    <div class="label">Moments Captured</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-images"></i>
+                    <div class="number">{{ images.total }}</div>
+                    <div class="label">Moments Captured</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-users"></i>
+                    <div class="number">{{ family_members }}</div>
+                    <div class="label">Family Members</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="number">{{ current_year }}</div>
+                    <div class="label">Current Year</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="upload-section">
+            <div class="section-title">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h2>Share a New Memory</h2>
+            </div>
+            
+            <form method="POST" action="{{ url_for('upload_image') }}" enctype="multipart/form-data" id="uploadForm">
+    <div class="upload-form">
+        <div class="upload-area" id="uploadTrigger">
+            <i class="fas fa-images" id="uploadIcon"></i>
+            <h3 id="uploadTitle">Upload Your Photo</h3>
+            <p id="uploadText">Click or drag & drop your image here</p>
+            <button type="button" class="upload-btn" id="browseBtn">
+                <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+            <input type="file" class="upload-input" id="imageUpload" name="image" accept="image/*" required>
+        </div>
+        
+        <div class="caption-area">
+            <label for="imageCaption"><i class="fas fa-pen-alt"></i> Add a Caption</label>
+            <textarea 
+                id="imageCaption" 
+                class="caption-textarea" 
+                name="caption"
+                placeholder="Describe this memory..."
+            ></textarea>
+        </div>
+        
+        <div class="submit-area">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-upload"></i> Upload to Family Album
+            </button>
+        </div>
+    </div>
+</form>
+        </div>
+        
+        <div class="section-title">
+            <i class="fas fa-book-open"></i>
+            <h2>Our Family Album</h2>
+        </div>
+        
+        {% if images.total > 0 %}
+        <div class="image-grid">
+            {% for image in images.items %}
+            <div class="image-card delay-{{ loop.index % 6 }}">
+                <div class="image-container">
+                    <img src="{{ url_for('uploaded_file', filename=image.thumbnail) }}" alt="{{ image.caption }}">
+                </div>
+                <div class="image-overlay">
+                    <div class="caption">{{ image.caption or "Family Memory" }}</div>
+                    <div class="uploader"><i class="fas fa-user"></i> {{ image.uploader.name }}</div>
+                    <div class="date"><i class="fas fa-calendar"></i> {{ image.timestamp.strftime('%b %d, %Y') }}</div>
+                </div>
+                <div class="image-actions">
+                    <a href="{{ url_for('download_image', filename=image.filename) }}" class="action-btn download" title="Download">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    {% if user.is_admin %}
+                    <form method="POST" action="{{ url_for('delete_image', image_id=image.id) }}" class="delete-form">
+                        <button type="submit" class="action-btn delete" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-album" style="text-align: center; padding: 3rem; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+            <i class="fas fa-images" style="font-size: 5rem; color: #e0e0e0; margin-bottom: 1rem;"></i>
+            <h3 style="color: #6c757d; margin-bottom: 1rem;">Your Family Album is Empty</h3>
+            <p class="text-muted">Be the first to share a memory! Upload a photo to get started.</p>
+            <button class="btn btn-primary mt-2" onclick="document.getElementById('imageUpload').click()" style="background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: var(--transition);">
+                <i class="fas fa-camera me-2"></i>Upload First Photo
+            </button>
+        </div>
+        {% endif %}
+        
+        {% if images.pages > 1 %}
+        <div class="pagination">
+            {% if images.has_prev %}
+            <a href="{{ url_for('album', page=images.prev_num) }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for page_num in images.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=3) %}
+                {% if page_num %}
+                    <a href="{{ url_for('album', page=page_num) }}" class="page-btn {% if page_num == images.page %}active{% endif %}">
+                        {{ page_num }}
+                    </a>
+                {% else %}
+                    <span class="page-btn disabled">...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if images.has_next %}
+            <a href="{{ url_for('album', page=images.next_num) }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="image-modal" id="imageModal">
+        <span class="close-modal" id="closeModal">&times;</span>
+        
+        <div class="modal-nav modal-prev" id="prevImage">
+            <i class="fas fa-chevron-left"></i>
+        </div>
+        
+        <div class="modal-nav modal-next" id="nextImage">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        
+        <div class="modal-content" id="modalContent">
+            <img id="modalImage" src="" alt="">
+            <div class="modal-caption" id="modalCaption"></div>
+            <div class="modal-meta" id="modalMeta"></div>
+        </div>
+        
+        <div class="modal-tools">
+            <div class="modal-tool zoom-tool" id="zoomTool">
+                <i class="fas fa-search-plus"></i>
+            </div>
+            <a class="modal-tool download-tool" id="downloadTool">
+                <i class="fas fa-download"></i>
+            </a>
+        </div>
+        
+        <div class="zoom-controls" id="zoomControls">
+            <div class="zoom-btn" id="zoomIn">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="zoom-btn" id="zoomOut">
+                <i class="fas fa-minus"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hamburger menu functionality
+            const hamburger = document.getElementById('hamburger');
+            const menuContent = document.getElementById('menuContent');
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            const modalMeta = document.getElementById('modalMeta');
+            const closeModal = document.getElementById('closeModal');
+            const prevImage = document.getElementById('prevImage');
+            const nextImage = document.getElementById('nextImage');
+            const zoomTool = document.getElementById('zoomTool');
+            const downloadTool = document.getElementById('downloadTool');
+            const zoomIn = document.getElementById('zoomIn');
+            const zoomOut = document.getElementById('zoomOut');
+            const modalContent = document.getElementById('modalContent');
+            const zoomControls = document.getElementById('zoomControls');
+            
+            // Store all images in an array
+            const imageCards = document.querySelectorAll('.image-card');
+            let currentImageIndex = 0;
+            let isZoomed = false;
+            let isDragging = false;
+            let startX, startY, scrollLeft, scrollTop;
+            let zoomLevel = 1;
+            let maxZoom = 3;
+            
+            // Function to open modal with specific image
+            function openModal(index) {
+                currentImageIndex = index;
+                const image = imageCards[index];
+                const imgSrc = image.querySelector('img').src.replace('thumbnail', 'original');
+                const caption = image.querySelector('.caption').textContent;
+                const uploader = image.querySelector('.uploader').textContent;
+                const date = image.querySelector('.date').textContent;
+                
+                modalImage.src = imgSrc;
+                modalCaption.textContent = caption;
+                modalMeta.textContent = `${uploader} • ${date}`;
+                
+                // Set download link
+                const downloadBtn = image.querySelector('.download');
+                if (downloadBtn) {
+                    downloadTool.href = downloadBtn.href;
+                }
+                
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                // Reset zoom state
+                isZoomed = false;
+                modalContent.classList.remove('zoomed');
+                zoomLevel = 1;
+            }
+            
+            // Close modal function
+            function closeModalFunc() {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Navigation functions
+            function showPrevImage() {
+                currentImageIndex = (currentImageIndex - 1 + imageCards.length) % imageCards.length;
+                openModal(currentImageIndex);
+            }
+            
+            function showNextImage() {
+                currentImageIndex = (currentImageIndex + 1) % imageCards.length;
+                openModal(currentImageIndex);
+            }
+            
+            // Zoom functionality
+            function toggleZoom() {
+                isZoomed = !isZoomed;
+                modalContent.classList.toggle('zoomed', isZoomed);
+                zoomTool.innerHTML = isZoomed ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
+                
+                if (!isZoomed) {
+                    zoomLevel = 1;
+                } else {
+                    zoomLevel = 1.5;
+                }
+            }
+            
+            function adjustZoom(direction) {
+                if (direction === 'in') {
+                    zoomLevel = Math.min(zoomLevel + 0.2, maxZoom);
+                } else {
+                    zoomLevel = Math.max(zoomLevel - 0.2, 1);
+                }
+                
+                modalContent.style.transform = `translate(-50%, -50%) scale(${zoomLevel})`;
+                isZoomed = zoomLevel > 1;
+                zoomTool.innerHTML = isZoomed ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
+            }
+            
+            // Event listeners for modal
+            closeModal.addEventListener('click', closeModalFunc);
+            prevImage.addEventListener('click', showPrevImage);
+            nextImage.addEventListener('click', showNextImage);
+            zoomTool.addEventListener('click', toggleZoom);
+            zoomIn.addEventListener('click', () => adjustZoom('in'));
+            zoomOut.addEventListener('click', () => adjustZoom('out'));
+            
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModalFunc();
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (modal.style.display === 'block') {
+                    if (e.key === 'Escape') {
+                        closeModalFunc();
+                    } else if (e.key === 'ArrowLeft') {
+                        showPrevImage();
+                    } else if (e.key === 'ArrowRight') {
+                        showNextImage();
+                    } else if (e.key === ' ') {
+                        toggleZoom();
+                    } else if (e.key === '+') {
+                        adjustZoom('in');
+                    } else if (e.key === '-') {
+                        adjustZoom('out');
+                    }
+                }
+            });
+            
+            // Swipe functionality for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            modalImage.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+            
+            modalImage.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    showNextImage();
+                } else if (touchEndX > touchStartX + swipeThreshold) {
+                    showPrevImage();
+                }
+            }
+            
+            // Drag functionality for zoomed image
+            modalContent.addEventListener('mousedown', startDragging);
+            modalContent.addEventListener('touchstart', startDragging);
+            
+            function startDragging(e) {
+                if (!isZoomed) return;
+                
+                isDragging = true;
+                modalContent.classList.add('dragging');
+                
+                startX = e.pageX || e.touches[0].pageX;
+                startY = e.pageY || e.touches[0].pageY;
+                scrollLeft = modalContent.scrollLeft;
+                scrollTop = modalContent.scrollTop;
+                
+                e.preventDefault();
+            }
+            
+            document.addEventListener('mousemove', dragImage);
+            document.addEventListener('touchmove', dragImage, { passive: false });
+            
+            function dragImage(e) {
+                if (!isDragging) return;
+                
+                const x = e.pageX || e.touches[0].pageX;
+                const y = e.pageY || e.touches[0].pageY;
+                const walkX = (x - startX) * 2;
+                const walkY = (y - startY) * 2;
+                
+                modalContent.scrollLeft = scrollLeft - walkX;
+                modalContent.scrollTop = scrollTop - walkY;
+                
+                e.preventDefault();
+            }
+            
+            document.addEventListener('mouseup', stopDragging);
+            document.addEventListener('touchend', stopDragging);
+            
+            function stopDragging() {
+                isDragging = false;
+                modalContent.classList.remove('dragging');
+            }
+            
+            // Pinch to zoom for touch devices
+            let initialDistance = null;
+            
+            modalImage.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+            
+            modalImage.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    if (initialDistance !== null) {
+                        const scaleFactor = currentDistance / initialDistance;
+                        zoomLevel = Math.min(Math.max(zoomLevel * scaleFactor, 1), maxZoom);
+                        
+                        modalContent.style.transform = `translate(-50%, -50%) scale(${zoomLevel})`;
+                        isZoomed = zoomLevel > 1;
+                        zoomTool.innerHTML = isZoomed ? '<i class="fas fa-search-minus"></i>' : '<i class="fas fa-search-plus"></i>';
+                        
+                        initialDistance = currentDistance;
+                    }
+                }
+            });
+            
+            modalImage.addEventListener('touchend', function() {
+                initialDistance = null;
+            });
+            
+            // Add click event to all image cards
+            imageCards.forEach((card, index) => {
+                card.addEventListener('click', function(e) {
+                    // Only open modal if not clicking on action buttons
+                    if (!e.target.closest('.image-actions')) {
+                        openModal(index);
+                    }
+                });
+            });
+            
+            hamburger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.body.classList.toggle('menu-open');
+            });
+            
+            // Staggered animation for menu items
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach((item, index) => {
+                item.style.transitionDelay = `${index * 0.1}s`;
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!menuContent.contains(event.target) && event.target !== hamburger) {
+                    document.body.classList.remove('menu-open');
+                }
+            });
+            
+            // Close menu when clicking on a link
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    document.body.classList.remove('menu-open');
+                });
+            });
+            
+            
+            
+            // Auto-remove flash messages after 5 seconds
+            setTimeout(() => {
+                const flashes = document.querySelectorAll('.flash');
+                flashes.forEach(flash => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500);
+                });
+            }, 5000);
+        });
+        // Set current year
+        document.querySelector('.stat-box .number').textContent = new Date().getFullYear();
+        
+        // Upload trigger functionality
+        document.getElementById('browseBtn').addEventListener('click', function() {
+            document.getElementById('imageUpload').click();
+        });
+        
+        
+        document.getElementById('uploadTrigger').addEventListener('click', function(e) {
+            if (e.target !== this) return;
+            document.getElementById('imageUpload').click();
+        });
+        
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const fileName = this.files[0].name;
+                const uploadIcon = document.getElementById('uploadIcon');
+                const uploadTitle = document.getElementById('uploadTitle');
+                const uploadText = document.getElementById('uploadText');
+                const browseBtn = document.getElementById('browseBtn');
+                
+                uploadIcon.className = 'fas fa-check-circle';
+                uploadIcon.style.color = '#4CAF50';
+                uploadTitle.textContent = 'File Selected';
+                uploadText.textContent = fileName;
+                browseBtn.innerHTML = '<i class="fas fa-sync"></i> Change File';
+            }
+        });
+        
+        // Form submission handling
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('imageUpload');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select an image to upload!');
+                return;
+            }
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            submitBtn.disabled = true;
+        });
+        
+        // Image hover effect enhancement
+        const imageCards = document.querySelectorAll('.image-card');
+        imageCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.zIndex = '10';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.zIndex = '1';
+            });
+        });
+        
+        // Delete confirmation
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Are you sure you want to delete this image?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Submit button animation
+        const submitBtn = document.querySelector('.submit-btn');
+        const uploadForm = document.getElementById('uploadForm');
+        
+        uploadForm.addEventListener('submit', function(e) {
+            const imageInput = document.getElementById('imageUpload');
+            const caption = document.getElementById('imageCaption').value;
+            
+            if (!imageInput.files[0]) {
+                e.preventDefault();
+                alert('Please select an image to upload!');
+                return;
+            }
+            
+            if (!caption) {
+                if (!confirm('You haven\'t added a caption. Continue without one?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            submitBtn.disabled = true;
+        });
+   
+        
+    </script>
+</body>
+</html>
