@@ -2146,6 +2146,38 @@
                     right: -100%;
                 }
             }
+            .input-row > button, 
+            .input-row > .chat-action {
+                flex-shrink: 0;
+            }
+
+            @media (max-width: 480px) {
+                .input-row {
+                    gap: 4px;
+                }
+                
+                .input-row input {
+                    padding: 8px 12px;
+                    font-size: 0.85rem;
+                }
+                
+                .input-row > button, 
+                .input-row > .chat-action {
+                    width: 44px;
+                    height: 44px;
+                    min-width: 44px;
+                    min-height: 44px;
+                    font-size: 1.1rem;
+                }
+                
+                .input-row #sendMessageBtn {
+                    display: flex !important; /* Ensure it's always visible */
+                }
+                
+                .input-row #recordButton {
+                    display: flex !important; /* Ensure it's always visible */
+                }
+            }
         </style>
     </head>
     <body>
